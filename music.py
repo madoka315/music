@@ -48,17 +48,8 @@ async def choose_song(bot, ev):
                 song = song_dict[idx]
                 if song['type'] == '163':
                     music = MessageSegment.music(song['type'], song['id'])
-                elif song['type'] == 'custom':
-                    music = MessageSegment(type_='music', data=song)
                 else:
-                    music = MessageSegment(
-                        type_='music',
-                        data={
-                            'id': str(song['id']),
-                            'type': song['type'],
-                            'content': song['artists']
-                        }
-                    )
+                    music = MessageSegment(type_='music', data=song)
                 await bot.send(ev, music)
         del temp[key]
         del last_check[str(ev.group_id)]
@@ -92,7 +83,7 @@ async def to_apply_for_title(bot, ev):
             if song_list[0]['type'] == '163':
                 msg.append('=== 网易云音乐 ===')
             for idx, song in enumerate(song_list):
-                if song['type'] == 'qq' and flag:
+                if song.get('subtype') == 'qq' and flag:
                     msg.append('=== QQ 音乐 ===')
                     flag = False
                 if song['type'] == 'custom' and song['subtype'] == 'migu' and flag2:
