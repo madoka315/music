@@ -72,7 +72,6 @@ async def to_apply_for_title(bot, ev):
         music_name = ''.join(music_name)
         song_list = await search_music(music_name)
         if song_list:
-            sv.logger.info('成功获取到歌曲列表')
             key = f'{ev.group_id}-{ev.user_id}'
             temp[key] = {}
             # _music = MessageSegment.music(type_=_type, id_=_id)
@@ -114,7 +113,6 @@ async def search_netease_cloud_music(bot, ev):
         music_name = ''.join(music_name)
         song_list = await search163(music_name, result_num=5)
         if song_list:
-            sv.logger.info('成功获取到歌曲列表')
             key = f'{ev.group_id}-{ev.user_id}'
             temp[key] = {}
             # _music = MessageSegment.music(type_=_type, id_=_id)
@@ -150,7 +148,6 @@ async def search_qq_music(bot, ev):
         music_name = ''.join(music_name)
         song_list = await searchqq(music_name, result_num=5)
         if song_list:
-            sv.logger.info('成功获取到歌曲列表')
             key = f'{ev.group_id}-{ev.user_id}'
             temp[key] = {}
             # _music = MessageSegment.music(type_=_type, id_=_id)
