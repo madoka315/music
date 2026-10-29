@@ -3,13 +3,14 @@ import typing
 
 from aiocqhttp.message import MessageSegment
 
-from hoshino import Service
+from hoshino import Service, logger
+from hoshino.typing import CQHttpError
 
 from .search_netease_cloud_music import search as search163
 from .search_qq_music import search as searchqq
 
 sv = Service(
-    'music',
+    '点歌',
     enable_on_default=True,
     visible=True,
     help_="[点歌 好日子] 混合搜索\n"
@@ -23,6 +24,25 @@ expire = datetime.timedelta(minutes=2)
 
 temp = {}
 last_check = {}
+
+
+async def send_song(bot, ev, song: dict):
+    """优先发音乐卡片；卡片签名服务不可用时退化为 封面图 + 文字链接"""
+    try:
+        if song.get('type') == '163':
+            music = MessageSegment.music(song['type'], song['id'])
+        else:
+            music = MessageSegment(type_='music', data=song)
+        await bot.send(ev, music)
+        return
+    except CQHttpError as e:
+        logger.warning(f'音乐卡片发送失败，改用图文：{type(e).__name__} {e}')
+
+    text = f'{song["name"]} - {song.get("artists", "")}\n{song.get("url", "")}'
+    if song.get('image'):
+        await bot.send(ev, MessageSegment.image(song['image']) + text.strip())
+    else:
+        await bot.send(ev, text.strip())
 
 
 @sv.on_prefix(['选', '选择', '选歌'])
@@ -43,12 +63,7 @@ async def choose_song(bot, ev):
         song_idx = ''.join(song_idx)
         for idx in song_idx:
             if idx in song_dict:
-                song = song_dict[idx]
-                if song['type'] == '163':
-                    music = MessageSegment.music(song['type'], song['id'])
-                else:
-                    music = MessageSegment(type_='music', data=song)
-                await bot.send(ev, music)
+                await send_song(bot, ev, song_dict[idx])
         del temp[key]
         del last_check[str(ev.group_id)]
         # else:
